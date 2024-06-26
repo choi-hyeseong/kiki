@@ -14,7 +14,9 @@ class Packet(
     val id : Int,
     val packetType: PacketType,
     val payload : PayloadResult<String>
-)
+) {
+    constructor(id : Int, packetType: PacketType, byteArray: ByteArray) : this(id, packetType, PayloadResult.success(Base64.getEncoder().encodeToString(byteArray)))
+}
 
 // bytearray로 변환된 payload 얻거나 null반환
 fun PayloadResult<String>.getBytePayloadOrNull() : ByteArray? {

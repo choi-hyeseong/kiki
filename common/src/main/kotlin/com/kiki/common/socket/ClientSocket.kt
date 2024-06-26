@@ -56,7 +56,7 @@ class ClientSocket(id : Int, outboundQueue : Queue<Packet>, socket : Socket) : A
                 var readByte = reader.read(array)
                 while (readByte != -1 && isRunning) {
                     val readPacket = array.slice(IntRange(0, readByte - 1)).toByteArray()
-                    sendPacket(Packet(id, PacketType.MESSAGE, PayloadResult.success(Base64.getEncoder().encodeToString(readPacket))))
+                    sendPacket(Packet(id, PacketType.MESSAGE, readPacket))
                     readByte = reader.read(array)
                 }
             } catch (e: Exception) {
