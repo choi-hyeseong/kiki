@@ -39,9 +39,13 @@ abstract class AbstractSocketPool(val socket: Socket) {
         socketPool.forEach { it.stopSocket() }
     }
 
-    // 소켓 풀에 추가. 추가된 소켓 객체 반환
+    // 소켓 풀에 추가. 추가된 소켓 객체 반환. 내부 id 사용
     fun addSocketToPool(clientSocket: Socket) : ClientSocket {
-        val id = atomicInteger.getAndIncrement()
+        return addSocketToPoolWithId(atomicInteger.getAndIncrement(), clientSocket)
+    }
+
+    // 소켓 풀에 추가. 추가된 소켓 객체 반환, id 직접 지정가능. 내부 카운터값 변하지 않음.
+    protected fun addSocketToPoolWithId(id : Int, clientSocket: Socket) : ClientSocket {
         val client = ClientSocket(id, socket, clientSocket)
         socketPool.add(client)
         threadPoolExecutor.submit(client)

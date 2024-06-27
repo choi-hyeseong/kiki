@@ -2,6 +2,8 @@ package com.kiki.client
 
 import com.kiki.common.packet.Packet
 import com.kiki.common.packet.type.PacketType
+import com.kiki.common.result.PayloadResult
+import com.kiki.common.result.exception.PayloadException
 import com.kiki.common.socket.ClientSocket
 import com.kiki.common.socket.pool.AbstractSocketPool
 import com.kiki.common.util.writeObject
@@ -27,8 +29,10 @@ class ClientPool(private val port : Int, socket: Socket) : AbstractSocketPool(so
     }
 
     override fun handlePacket(packet: Packet) {
-        if (packet.packetType == PacketType.ACCEPT)
-            addSocketToPool(Socket("127.0.0.1", port))
+        if (packet.packetType == PacketType.ACCEPT) {
+            kotlin.runCatching { addSocketToPoolWithId(packet.id, Socket("127.0.0.1", port)) }
+                .onFailure { socket.getOutputStream().writeObject(Packet(packet.id, PacketType.MESSAGE, PayloadResult.failure(PayloadException("Can't connect")))) } //접속 실패시 error 발생 알림
+        }
         else
             notifyPacket(packet)
     }
