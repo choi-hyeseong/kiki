@@ -40,6 +40,7 @@ class Server {
             val socketServer = SocketServer(socket)
             serverList.add(socketServer) //서버맵에 추가
             threadPoolExecutor.submit(socketServer) //작동되게 추가
+            println("Client Connected")
         }
         stopServer()
 

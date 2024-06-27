@@ -55,6 +55,7 @@ abstract class AbstractSocketPool(val socket: Socket) {
         val clientSocket = ClientSocket(atomicInteger.getAndIncrement(), packetQueue, socket)
         socketPool.add(clientSocket)
         threadPoolExecutor.submit(clientSocket)
+        println("Added Socket - ${atomicInteger.get()}")
         return clientSocket
     }
 
