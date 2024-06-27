@@ -29,7 +29,7 @@ class SocketServer(socket : Socket) : AbstractSocketPool(socket), Runnable {
 
     override fun startClient() {
         init()
-        serverSocket = ServerSocket(50000) //랜덤포트로 생성 (0으로 지정해야 랜덤!!)
+        serverSocket = ServerSocket(51000) //랜덤포트로 생성 (0으로 지정해야 랜덤!!)
         socket.getOutputStream().writeString("Server Opened - ${serverSocket.inetAddress.hostAddress}:${serverSocket.localPort}")
         acceptSocket(serverSocket) //무한루프
     }

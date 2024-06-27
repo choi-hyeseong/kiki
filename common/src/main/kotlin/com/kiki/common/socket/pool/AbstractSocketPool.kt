@@ -9,10 +9,7 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.net.Socket
 import java.util.*
-import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.SynchronousQueue
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.*
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -26,8 +23,7 @@ abstract class AbstractSocketPool(val socket: Socket) {
     protected var isRunning: Boolean = false
     private val atomicInteger : AtomicInteger = AtomicInteger()
     private val socketPool: Queue<ClientSocket> = ConcurrentLinkedQueue()
-    private val threadPoolExecutor: ThreadPoolExecutor =
-        ThreadPoolExecutor(6, 200, 10, TimeUnit.MINUTES, SynchronousQueue())
+    private val threadPoolExecutor: ExecutorService = Executors.newVirtualThreadPerTaskExecutor()
 
 
     // 해당 풀 시작하는 메소드 - init 호출 필요

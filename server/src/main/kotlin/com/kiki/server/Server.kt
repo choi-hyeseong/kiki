@@ -2,9 +2,7 @@ package com.kiki.server
 
 import java.net.ServerSocket
 import java.net.Socket
-import java.util.concurrent.SynchronousQueue
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.*
 
 /**
  * Tunneling Client - 'Server' - Client
@@ -19,8 +17,7 @@ class Server {
     private val port : Int = 6960
     // 동작중인 클라이언트 서버
     private val serverList : MutableList<SocketServer> = mutableListOf()
-    private val threadPoolExecutor : ThreadPoolExecutor = ThreadPoolExecutor(6, 200, 10, TimeUnit.MINUTES, SynchronousQueue())
-
+    private val threadPoolExecutor : ExecutorService = Executors.newVirtualThreadPerTaskExecutor()
     private lateinit var serverSocket : ServerSocket
 
     /**

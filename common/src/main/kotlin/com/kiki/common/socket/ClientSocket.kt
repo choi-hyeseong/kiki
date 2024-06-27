@@ -14,16 +14,17 @@ class ClientSocket(id : Int, outBoundSocket : Socket, socket : Socket) : Abstrac
 
     @Volatile
     private var isRunning: Boolean = false
+    private lateinit var thread: Thread
 
     override fun run() {
         isRunning = true
-        readSocket() //내부 쓰레드
+        thread = readSocket() //내부 쓰레드
     }
 
 
     // 연결된 소켓에서 읽어서 - 서버로 전달
-    private fun readSocket() {
-        thread {
+    private fun readSocket() : Thread {
+        val runnable = Runnable {
             try {
                 val array = ByteArray(10000)
                 val reader = socket.getInputStream()
@@ -33,16 +34,19 @@ class ClientSocket(id : Int, outBoundSocket : Socket, socket : Socket) : Abstrac
                     sendPacket(Packet(id, PacketType.MESSAGE, readPacket))
                     readByte = reader.read(array)
                 }
-            } catch (e: Exception) {
+            }
+            catch (e: Exception) {
                 println("Read error - $id | ${e.message}")
                 socket.close()
                 sendPacket(Packet(id, PacketType.MESSAGE, PayloadResult.failure(PayloadException("Connection reset")))) //에러 핸들
             }
         }
+        return Thread.startVirtualThread(runnable) //가상 쓰레드로 시작
     }
 
     //소켓 작동 중단
     fun stopSocket() {
         isRunning = false
+        thread.interrupt() //쓰레드 중단
     }
 }
