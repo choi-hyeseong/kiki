@@ -16,7 +16,7 @@ abstract class AbstractSocketPool(val socket: Socket) {
 
     @Volatile
     protected var isRunning: Boolean = false
-    private val atomicInteger : AtomicInteger = AtomicInteger()
+    private val atomicInteger : AtomicInteger = AtomicInteger(1)
     private val socketPool: Queue<ClientSocket> = ConcurrentLinkedQueue()
     private val threadPoolExecutor: ExecutorService = Executors.newVirtualThreadPerTaskExecutor()
 
@@ -41,10 +41,11 @@ abstract class AbstractSocketPool(val socket: Socket) {
 
     // 소켓 풀에 추가. 추가된 소켓 객체 반환
     fun addSocketToPool(clientSocket: Socket) : ClientSocket {
-        val client = ClientSocket(atomicInteger.getAndIncrement(), socket, clientSocket)
+        val id = atomicInteger.getAndIncrement()
+        val client = ClientSocket(id, socket, clientSocket)
         socketPool.add(client)
         threadPoolExecutor.submit(client)
-        println("Added Socket - ${atomicInteger.get()}")
+        println("Added Socket - $id")
         return client
     }
 
