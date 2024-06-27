@@ -20,7 +20,7 @@ class SocketServer(socket : Socket) : AbstractSocketPool(socket), Runnable {
     override fun startPool() {
         init()
         serverSocket = ServerSocket(0) //랜덤포트로 생성 (0으로 지정해야 랜덤!!)
-        socket.getOutputStream().writeString("Server Opened - ${serverSocket.inetAddress.hostAddress}:${serverSocket.localPort}")
+        socket.getOutputStream().writeString("Server Opened - ${serverSocket.localPort}")
         acceptSocket(serverSocket) //무한루프
     }
 
