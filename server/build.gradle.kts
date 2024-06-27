@@ -1,5 +1,6 @@
 plugins {
     id("java")
+    id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
 group = "org.example"
@@ -16,4 +17,11 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.withType<Jar> {
+    manifest {
+        // main class define
+        attributes["Main-Class"] = "com.kiki.server.ServerKt"
+    }
 }
