@@ -92,7 +92,9 @@ abstract class AbstractSocketPool(val socket: Socket) {
 
     // 풀 내에 있는 소켓들에게 패킷 notify
     protected fun notifyPacket(packet: Packet) {
-        socketPool.forEach { it.handlePacket(packet) }
+        socketPool.stream().forEach {
+            it.handlePacket(packet)
+        }
     }
 }
 
