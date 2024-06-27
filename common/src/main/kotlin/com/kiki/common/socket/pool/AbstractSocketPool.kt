@@ -39,13 +39,24 @@ abstract class AbstractSocketPool(val socket: Socket) {
         socketPool.forEach { it.stopSocket() }
     }
 
-    // 소켓 풀에 추가. 추가된 소켓 객체 반환. 내부 id 사용
+    /**
+     * 소켓풀에 소켓을 추가하는데, 내부 카운터를 이용해 쓰레드 안전하게 추가합니다.
+     * @param clientSocket 추가할 소켓입니다.
+     */
     fun addSocketToPool(clientSocket: Socket) : ClientSocket {
         return addSocketToPoolWithId(atomicInteger.getAndIncrement(), clientSocket)
     }
 
-    // 소켓 풀에 추가. 추가된 소켓 객체 반환, id 직접 지정가능. 내부 카운터값 변하지 않음.
+
+    /**
+     * 소켓 풀에 소켓 추가, id값을 직접 지정 가능한 메소드
+     * @param id 해당 소켓의 id를 지정할 수 있습니다. 이미 지정된 소켓의 id인경우 문제가 발생할 수 있습니다.
+     * @param clientSocket 추가할 소켓의 id입니다.
+     * @throws IllegalArgumentException 이미 풀에 등록된 소켓의 id를 지정할경우 발생합니다.
+     */
     protected fun addSocketToPoolWithId(id : Int, clientSocket: Socket) : ClientSocket {
+        if (socketPool.find { it.id  == id } != null)
+            throw IllegalStateException("이미 존재하는 소켓의 id입니다.")
         val client = ClientSocket(id, socket, clientSocket)
         socketPool.add(client)
         threadPoolExecutor.submit(client)
