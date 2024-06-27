@@ -28,4 +28,11 @@ class PacketTest {
         assertNotNull(exception)
         assertEquals("타임아웃", exception?.message)
     }
+
+    @Test
+    fun testByteArrayConstructor() {
+        val str = "Hello"
+        val packet = Packet(1, PacketType.MESSAGE, str.encodeToByteArray())
+        assertEquals("Hello", packet.payload.getBytePayloadOrNull()?.decodeToString())
+    }
 }
