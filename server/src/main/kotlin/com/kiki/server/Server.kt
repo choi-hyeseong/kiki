@@ -1,7 +1,6 @@
 package com.kiki.server
 
 import java.net.ServerSocket
-import java.net.Socket
 import java.util.concurrent.*
 
 /**
@@ -49,7 +48,7 @@ class Server {
     fun stopServer() {
         isRunning = false
         serverList.forEach {
-            it.stopClient() //서버 중단
+            it.stopPool() //서버 중단
         }
         threadPoolExecutor.shutdown()
         serverSocket.close()

@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit
 
 class ClientPool(private val port : Int, socket: Socket) : AbstractSocketPool(socket) {
 
-    override fun startClient() {
+    override fun startPool() {
         socket.getInputStream().bufferedReader().readLine().also { println(it) } //url print 하기 위해 맨처음 listen
         init()
         while (isRunning) {
@@ -22,7 +22,7 @@ class ClientPool(private val port : Int, socket: Socket) : AbstractSocketPool(so
         }
     }
 
-    override fun stopClient() {
+    override fun stopPool() {
         close()
     }
 

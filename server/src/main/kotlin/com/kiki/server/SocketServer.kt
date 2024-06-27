@@ -3,21 +3,11 @@ package com.kiki.server
 import com.kiki.common.packet.Packet
 import com.kiki.common.packet.type.PacketType
 import com.kiki.common.result.PayloadResult
-import com.kiki.common.socket.ClientSocket
 import com.kiki.common.socket.pool.AbstractSocketPool
-import com.kiki.common.util.PacketUtil
 import com.kiki.common.util.writeObject
 import com.kiki.common.util.writeString
-import java.io.BufferedReader
-import java.io.InputStreamReader
 import java.net.ServerSocket
 import java.net.Socket
-import java.util.Queue
-import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.SynchronousQueue
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * 클라이언트와 연결하기 위한 서버
@@ -27,9 +17,9 @@ class SocketServer(socket : Socket) : AbstractSocketPool(socket), Runnable {
 
     private lateinit var serverSocket : ServerSocket
 
-    override fun startClient() {
+    override fun startPool() {
         init()
-        serverSocket = ServerSocket(51000) //랜덤포트로 생성 (0으로 지정해야 랜덤!!)
+        serverSocket = ServerSocket(0) //랜덤포트로 생성 (0으로 지정해야 랜덤!!)
         socket.getOutputStream().writeString("Server Opened - ${serverSocket.inetAddress.hostAddress}:${serverSocket.localPort}")
         acceptSocket(serverSocket) //무한루프
     }
@@ -42,7 +32,7 @@ class SocketServer(socket : Socket) : AbstractSocketPool(socket), Runnable {
         }
     }
 
-    override fun stopClient() {
+    override fun stopPool() {
         close()
         serverSocket.close()
     }
@@ -53,7 +43,7 @@ class SocketServer(socket : Socket) : AbstractSocketPool(socket), Runnable {
     }
 
     override fun run() {
-        startClient()
+        startPool()
     }
 
 

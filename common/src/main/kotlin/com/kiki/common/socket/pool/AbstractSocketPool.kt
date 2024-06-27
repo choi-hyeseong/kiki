@@ -3,10 +3,6 @@ package com.kiki.common.socket.pool
 import com.kiki.common.packet.Packet
 import com.kiki.common.socket.ClientSocket
 import com.kiki.common.util.PacketUtil
-import com.kiki.common.util.writeObject
-import java.io.BufferedReader
-import java.io.IOException
-import java.io.InputStreamReader
 import java.net.Socket
 import java.util.*
 import java.util.concurrent.*
@@ -17,7 +13,6 @@ import java.util.concurrent.atomic.AtomicInteger
  * @property socket 서버와 연결된 소켓
  */
 abstract class AbstractSocketPool(val socket: Socket) {
-    // TODO Virtual Thread써서 한번 풀 최적화 되는지 확인해보기
 
     @Volatile
     protected var isRunning: Boolean = false
@@ -27,10 +22,10 @@ abstract class AbstractSocketPool(val socket: Socket) {
 
 
     // 해당 풀 시작하는 메소드 - init 호출 필요
-    abstract fun startClient()
+    abstract fun startPool()
 
     // 해당 풀 종료하는 메소드 - close 호출 필요
-    abstract fun stopClient()
+    abstract fun stopPool()
 
     // 패킷 전송, 수신 관리 init 메소드
     fun init() {
@@ -68,7 +63,7 @@ abstract class AbstractSocketPool(val socket: Socket) {
                 }
             }.onFailure {
                 println("Can't read packet - ${it.message}")
-                stopClient() //소켓 연결 자체가 끊겼으므로 중단
+                stopPool() //소켓 연결 자체가 끊겼으므로 중단
             }
         }
         threadPoolExecutor.submit(runnable)
