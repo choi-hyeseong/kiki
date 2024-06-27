@@ -49,7 +49,7 @@ abstract class AbstractSocketPool(val socket: Socket) {
 
 
     /**
-     * 소켓 풀에 소켓 추가, id값을 직접 지정 가능한 메소드
+     * 소켓 풀에 소켓 추가, id값을 직접 지정 가능한 메소드. 주의! addSocketToPool 메소드의 내부 카운터와 동기화 되지 않습니다. (3으로 WithId 호출후 addSocketToPool했을때 4 들어가는거 X)
      * @param id 해당 소켓의 id를 지정할 수 있습니다. 이미 지정된 소켓의 id인경우 문제가 발생할 수 있습니다.
      * @param clientSocket 추가할 소켓의 id입니다.
      * @throws IllegalArgumentException 이미 풀에 등록된 소켓의 id를 지정할경우 발생합니다.
