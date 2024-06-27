@@ -25,7 +25,6 @@ abstract class AbstractSocketPool(val socket: Socket) {
     @Volatile
     protected var isRunning: Boolean = false
     private val atomicInteger : AtomicInteger = AtomicInteger()
-    private val packetQueue: Queue<Packet> = ConcurrentLinkedQueue()
     private val socketPool: Queue<ClientSocket> = ConcurrentLinkedQueue()
     private val threadPoolExecutor: ThreadPoolExecutor =
         ThreadPoolExecutor(6, 200, 10, TimeUnit.MINUTES, SynchronousQueue())
@@ -40,7 +39,6 @@ abstract class AbstractSocketPool(val socket: Socket) {
     // 패킷 전송, 수신 관리 init 메소드
     fun init() {
         isRunning = true
-        requestPacketWrite()
         requestPacketRead()
     }
 
@@ -51,33 +49,14 @@ abstract class AbstractSocketPool(val socket: Socket) {
     }
 
     // 소켓 풀에 추가. 추가된 소켓 객체 반환
-    fun addSocketToPool(socket: Socket) : ClientSocket {
-        val clientSocket = ClientSocket(atomicInteger.getAndIncrement(), packetQueue, socket)
-        socketPool.add(clientSocket)
-        threadPoolExecutor.submit(clientSocket)
+    fun addSocketToPool(clientSocket: Socket) : ClientSocket {
+        val client = ClientSocket(atomicInteger.getAndIncrement(), socket, clientSocket)
+        socketPool.add(client)
+        threadPoolExecutor.submit(client)
         println("Added Socket - ${atomicInteger.get()}")
-        return clientSocket
+        return client
     }
 
-    // 서버로 패킷 전달하는 큐 작업 요청
-    private fun requestPacketWrite() {
-        val runnable = Runnable {
-            while (isRunning) {
-                runCatching {
-                    // 전송할 패킷 큐에 패킷이 있는경우
-                    val availablePacket = packetQueue.poll()
-                    if (availablePacket != null)
-                        socket.getOutputStream().writeObject(availablePacket)
-                    Thread.sleep(10) //계속 할당하지 않게 슬립
-                }.onFailure {
-                    println("Can't send packet - ${it.message}")
-                    // IOException인경우 연결 실패인경우이므로 connection 끊음
-                    stopClient() //소켓 연결 자체가 끊겼으므로 중단
-                }
-            }
-        }
-        threadPoolExecutor.submit(runnable)
-    }
 
     //서버로부터 패킷 읽어오는 작업 요청
     private fun requestPacketRead() {
