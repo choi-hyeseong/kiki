@@ -5,12 +5,13 @@ import com.kiki.common.packet.getBytePayloadOrNull
 import com.kiki.common.packet.type.PacketType
 import com.kiki.common.result.PayloadResult
 import com.kiki.common.result.exception.PayloadException
+import com.kiki.common.socket.queue.PacketQueue
 import java.io.IOException
 import java.net.Socket
 import java.util.*
 import kotlin.concurrent.thread
 
-class ClientSocket(id : Int, outBoundSocket : Socket, socket : Socket) : AbstractSocket(id, outBoundSocket, socket) {
+class ClientSocket(id : Int, outBoundQueue : PacketQueue, socket : Socket) : AbstractSocket(id, outBoundQueue, socket) {
 
     @Volatile
     private var isRunning: Boolean = false

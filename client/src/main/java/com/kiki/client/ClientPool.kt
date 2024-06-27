@@ -31,7 +31,7 @@ class ClientPool(private val port : Int, socket: Socket) : AbstractSocketPool(so
     override fun handlePacket(packet: Packet) {
         if (packet.packetType == PacketType.ACCEPT) {
             kotlin.runCatching { addSocketToPoolWithId(packet.id, Socket("127.0.0.1", port)) }
-                .onFailure { socket.getOutputStream().writeObject(Packet(packet.id, PacketType.MESSAGE, PayloadResult.failure(PayloadException("Can't connect")))) } //접속 실패시 error 발생 알림
+                .onFailure { packetQueue.addPacket(Packet(packet.id, PacketType.MESSAGE, PayloadResult.failure(PayloadException("Can't connect")))) } //접속 실패시 error 발생 알림
         }
         else
             notifyPacket(packet)

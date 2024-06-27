@@ -5,6 +5,7 @@ import com.kiki.common.packet.getBytePayloadOrNull
 import com.kiki.common.packet.type.PacketType
 import com.kiki.common.result.PayloadResult
 import com.kiki.common.result.exception.PayloadException
+import com.kiki.common.socket.queue.PacketQueue
 import com.kiki.common.util.writeObject
 import java.net.Socket
 import java.util.*
@@ -13,10 +14,10 @@ import java.util.concurrent.ConcurrentLinkedQueue
 /**
  * end 단에서 처리할 소켓 추상 클래스
  * @property id 각 소켓의 고유한 id입니다.
- * @property outBoundSocket 서버에 정보를 전달하기 위한 소켓입니다.
+ * @property outBoundQueue 서버에 정보를 전달하기 위한 패킷을 담을 큐입니다.
  * @property socket 현재 연결된 소켓입니다. (끝단)
  */
-abstract class AbstractSocket(val id: Int, private val outBoundSocket: Socket, protected val socket: Socket) :
+abstract class AbstractSocket(val id: Int, private val outBoundQueue : PacketQueue, protected val socket: Socket) :
     Runnable {
 
     /**
@@ -53,16 +54,10 @@ abstract class AbstractSocket(val id: Int, private val outBoundSocket: Socket, p
     }
 
     /**
-     * 연결된 서버로 패킷 보내는 메소드
+     * 연결된 서버로 패킷 보내는 큐에 패킷 담기
      */
     fun sendPacket(packet: Packet) {
-        // 서버로 패킷 전송
-        runCatching {
-            outBoundSocket.getOutputStream().writeObject(packet)
-        }.onFailure {
-            println("Can't send packet - ${it.message}")
-            // IOException인경우 연결 실패인경우이므로 connection 끊음
-            socket.close() //소켓 연결 자체가 끊겼으므로 중단
-        }
+        // 큐 담기
+        outBoundQueue.addPacket(packet)
     }
 }

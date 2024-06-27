@@ -28,7 +28,7 @@ class SocketServer(socket : Socket) : AbstractSocketPool(socket), Runnable {
         while (isRunning) {
             val connectedSocket = serverSocket.accept() //Client - Server와 다르게 얘는 실제 클라이언트가 연결되므로 accept 수행해야함.
             val clientSocket = addSocketToPool(connectedSocket)
-            socket.getOutputStream().writeObject(Packet(clientSocket.id, PacketType.ACCEPT, PayloadResult.success(""))) //소켓 연결됬다고 보내기
+            packetQueue.addPacket(Packet(clientSocket.id, PacketType.ACCEPT, PayloadResult.success(""))) //소켓 연결됬다고 보내기
         }
     }
 

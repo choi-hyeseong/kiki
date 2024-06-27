@@ -2,7 +2,9 @@ package com.kiki.common.socket.pool
 
 import com.kiki.common.packet.Packet
 import com.kiki.common.socket.ClientSocket
+import com.kiki.common.socket.queue.PacketQueue
 import com.kiki.common.util.PacketUtil
+import com.kiki.common.util.writeObject
 import java.net.Socket
 import java.util.*
 import java.util.concurrent.*
@@ -16,9 +18,10 @@ abstract class AbstractSocketPool(val socket: Socket) {
 
     @Volatile
     protected var isRunning: Boolean = false
-    private val atomicInteger : AtomicInteger = AtomicInteger(1)
-    private val socketPool: Queue<ClientSocket> = ConcurrentLinkedQueue()
-    private val threadPoolExecutor: ExecutorService = Executors.newVirtualThreadPerTaskExecutor()
+    private val atomicInteger : AtomicInteger = AtomicInteger(1) //소켓 id 부여하는 atomic Integer
+    protected val packetQueue : PacketQueue = PacketQueue(socket) //전송될 패킷이 대기하는 큐. (등록시 패킷 전송 됨)
+    private val socketPool: Queue<ClientSocket> = ConcurrentLinkedQueue() //연결된 소켓 담는 큐
+    private val threadPoolExecutor: ExecutorService = Executors.newVirtualThreadPerTaskExecutor() //쓰레드 풀
 
 
     // 해당 풀 시작하는 메소드 - init 호출 필요
@@ -31,12 +34,16 @@ abstract class AbstractSocketPool(val socket: Socket) {
     fun init() {
         isRunning = true
         requestPacketRead()
+        packetQueue.startHandle {
+            stopPool() //에러시 풀 중단
+        }
     }
 
     fun close() {
         isRunning = false
         threadPoolExecutor.shutdown()
         socketPool.forEach { it.stopSocket() }
+        packetQueue.stopHandle()
     }
 
     /**
@@ -57,7 +64,7 @@ abstract class AbstractSocketPool(val socket: Socket) {
     protected fun addSocketToPoolWithId(id : Int, clientSocket: Socket) : ClientSocket {
         if (socketPool.find { it.id  == id } != null)
             throw IllegalStateException("이미 존재하는 소켓의 id입니다.")
-        val client = ClientSocket(id, socket, clientSocket)
+        val client = ClientSocket(id, packetQueue, clientSocket)
         socketPool.add(client)
         threadPoolExecutor.submit(client)
         println("Added Socket - $id")
