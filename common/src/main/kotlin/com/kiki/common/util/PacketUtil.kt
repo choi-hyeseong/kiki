@@ -44,15 +44,3 @@ fun OutputStream.writeString(data: String) {
     printWriter.println(data)
     printWriter.flush()
 }
-
-fun main() {
-    val socket = Socket("127.0.0.1", 8080)
-    socket.getOutputStream().writeString("SEXXX")
-    val reader = socket.getInputStream()
-    val array = ByteArray(1000)
-    var read = reader.read(array)
-    while (read != -1) {
-        println(array.slice(IntRange(0, read -1)).toByteArray().decodeToString())
-        read = reader.read()
-    }
-}
