@@ -15,6 +15,7 @@ repositories {
 }
 
 dependencies {
+
     testImplementation(kotlin("test"))
 }
 
@@ -37,6 +38,7 @@ subprojects {
 
     dependencies {
         implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.1")
+        testImplementation("io.mockk:mockk:1.4.1")
         if (name != "common")
         // circular error 방지
             implementation(project(":common"))
