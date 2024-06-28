@@ -23,35 +23,14 @@ abstract class AbstractSocket(val id: Int, private val outBoundQueue : PacketQue
     /**
      * 처리 가능한 패킷인지 확인
      */
-    private fun isHandleable(packet: Packet): Boolean {
+    protected fun isHandleable(packet: Packet): Boolean {
         return packet.id == id
     }
 
     /**
      * 패킷 핸들링하기. 만약 자신의 패킷인경우 전송
      */
-    fun handlePacket(packet: Packet) {
-        // 핸들 불가능한경우 리턴
-
-        if (!isHandleable(packet))
-            return
-        runCatching {
-            val payload = packet.payload
-            //payload 확인
-            if (payload.isSuccess())
-                socket.getOutputStream().write(payload.getBytePayloadOrNull()!!)
-            else
-                throw IllegalStateException("Encountered Tunneling Exception ${payload.exception?.message}")
-        }.onFailure {
-            // 소켓에서 오류 발생시
-            socket.close()
-            println("Socket Error Found - $id | ${it.javaClass.simpleName} ${it.message.toString()}")
-            if (it !is IllegalStateException) //IS는 반대측에서 소켓 끊어졌다고 보내는 에러 메시지. 이게 아닌경우 에러 메시지 보내줘야함. 왜 위에는 IS로 했으면서 여기는 IA로 체크..
-                sendPacket(Packet(id, PacketType.MESSAGE, PayloadResult.failure(PayloadException("Connection reset")))) //에러 핸들
-        }
-
-
-    }
+    abstract fun handlePacket(packet: Packet)
 
     /**
      * 연결된 서버로 패킷 보내는 큐에 패킷 담기

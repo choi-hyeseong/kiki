@@ -11,7 +11,7 @@ import java.net.Socket
 import java.util.*
 import kotlin.concurrent.thread
 
-class ClientSocket(id : Int, outBoundQueue : PacketQueue, socket : Socket) : AbstractSocket(id, outBoundQueue, socket) {
+class ClientSocket(id: Int, outBoundQueue: PacketQueue, socket: Socket) : AbstractSocket(id, outBoundQueue, socket) {
 
     @Volatile
     private var isRunning: Boolean = false
@@ -21,6 +21,27 @@ class ClientSocket(id : Int, outBoundQueue : PacketQueue, socket : Socket) : Abs
         readSocket()
     }
 
+    override fun handlePacket(packet: Packet) {
+        // 핸들 불가능한경우 리턴
+        if (!isHandleable(packet))
+            return
+        runCatching {
+            val payload = packet.payload
+            //payload 확인
+            if (payload.isSuccess())
+                socket.getOutputStream().write(payload.getBytePayloadOrNull()!!)
+            else
+                throw IllegalStateException("Encountered Tunneling Exception ${payload.exception?.message}")
+        }.onFailure {
+            // 소켓에서 오류 발생시
+            socket.close()
+            println("Socket Error Found - $id | ${it.javaClass.simpleName} ${it.message.toString()}")
+            if (it !is IllegalStateException) //IS는 반대측에서 소켓 끊어졌다고 보내는 에러 메시지. 이게 아닌경우 에러 메시지 보내줘야함. 왜 위에는 IS로 했으면서 여기는 IA로 체크..
+                sendPacket(Packet(id, PacketType.MESSAGE, PayloadResult.failure(PayloadException("Connection reset")))) //에러 핸들
+        }
+
+
+    }
 
     // 연결된 소켓에서 읽어서 - 서버로 전달
     private fun readSocket() {
@@ -33,11 +54,16 @@ class ClientSocket(id : Int, outBoundQueue : PacketQueue, socket : Socket) : Abs
                 sendPacket(Packet(id, PacketType.MESSAGE, readPacket))
                 readByte = reader.read(array)
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("Read error - $id | ${e.message}")
             socket.close()
-            sendPacket(Packet(id, PacketType.MESSAGE, PayloadResult.failure(PayloadException("Connection reset")))) //에러 핸들
+            sendPacket(
+                Packet(
+                    id,
+                    PacketType.MESSAGE,
+                    PayloadResult.failure(PayloadException("Connection reset"))
+                )
+            ) //에러 핸들
         }
     }
 
