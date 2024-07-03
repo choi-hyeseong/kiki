@@ -1,6 +1,7 @@
 package com.kiki.server
 
 import java.net.ServerSocket
+import java.net.Socket
 import java.util.concurrent.*
 
 /**
@@ -30,16 +31,7 @@ class Server {
         println("Server is Running..")
         isRunning = true
         serverSocket = ServerSocket(port)
-        while (isRunning) {
-            // 터널링 클라이언트 연결된 경우
-            val socket = serverSocket.accept()
-            val socketServer = SocketServer(socket)
-            serverList.add(socketServer) //서버맵에 추가
-            threadPoolExecutor.submit(socketServer) //작동되게 추가
-            println("Client Connected")
-        }
-        stopServer()
-
+        acceptSocket(serverSocket)
     }
 
     /**
@@ -52,6 +44,18 @@ class Server {
         }
         threadPoolExecutor.shutdown()
         serverSocket.close()
+    }
+
+    private fun acceptSocket(serverSocket: ServerSocket) {
+        while (isRunning) {
+            // 터널링 클라이언트 연결된 경우
+            val socket = serverSocket.accept()
+            val socketServer = SocketServer(socket)
+            serverList.add(socketServer) //서버맵에 추가
+            threadPoolExecutor.submit(socketServer) //작동되게 추가
+            println("Client Connected")
+        }
+        stopServer()
     }
 
 }

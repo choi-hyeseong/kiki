@@ -20,6 +20,7 @@ class ClientPool(private val port : Int, socket: Socket) : AbstractSocketPool(so
         socket.getInputStream().bufferedReader().readLine().also { println(it) } //url print 하기 위해 맨처음 listen
         init()
         while (isRunning) {
+            // server pool은 socket accept가 있어 blocking이 되지만 client는 그런게 없으므로 while loop sleep 하기
             Thread.sleep(1000)
         }
     }
