@@ -37,8 +37,8 @@ abstract class AbstractSocketPool(val socket: Socket) {
     // 패킷 전송, 수신 관리 init 메소드
     fun init() {
         isRunning = true
-        startPacketReadAsync()
-        startPacketWriteAsync()
+        startPacketRead()
+        startPacketWrite()
     }
 
     fun close() {
@@ -75,13 +75,13 @@ abstract class AbstractSocketPool(val socket: Socket) {
 
 
     //서버로부터 패킷 읽어오는 작업 요청
-    private fun startPacketReadAsync() {
+    private fun startPacketRead() {
         threadPoolExecutor.submit(ServerPacketReader(socket, onPacket = { handlePacket(it) }, onError = { stopPool() }))
         // 패킷 읽기 성공시 handlePacket, 실패시 stopPool 호출.
     }
 
     //큐에 있는 패킷 처리 시작
-    private fun startPacketWriteAsync() {
+    private fun startPacketWrite() {
         packetQueue.startHandle (onError = { stopPool() }) //에러시 풀 중단
     }
 
