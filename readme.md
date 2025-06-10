@@ -3,6 +3,9 @@
 
 ![화면 캡처 2024-06-27 153250](https://github.com/choi-hyeseong/EggTranslate/assets/114974288/3571a55a-143f-4f56-b8f6-3cc70428db8a)
 
+### 시연 영상
+https://www.youtube.com/watch?v=flLrRF8b8Wo
+
 ### 상세한 내용은 velog에서 확인할 수 있습니다!! - https://velog.io/@choi-hyeseong/Introducing-KIKI
 #### 스크린샷에 기재되어 있을 수 있는 ip는 GCP의 ip로 해당 인스턴스는 제거해놔서 괜찮을겁니다.. 아마도?
 
